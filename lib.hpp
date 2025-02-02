@@ -103,6 +103,10 @@ inline std::vector<nlohmann::json> getLyrics(const std::string &query) {
   std::string encoded = url_encode(query);
   std::string url = "https://lrclib.net/api/search?q=" + encoded;
 
+  if (url == currentURL) {
+    return currentLyrics;
+  }
+
   std::filesystem::path cachePath = cacheDir / std::to_string(hash_fnv(url));
   std::string content;
 
