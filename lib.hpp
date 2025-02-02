@@ -174,20 +174,23 @@ inline std::string getPlainLine(uint64_t pos, uint64_t dur,
 }
 
 inline std::optional<std::string> getCurrentLine() {
-  std::string line;
+  std::string line = panicText;
   auto [title, artists, pos, dur, ok] = getNowPlaying();
   auto ret = getLyrics(title + ' ' + artists);
   if (ret.size()) {
-    auto &first = ret[0];
-    if (first.count("syncedLyrics")) {
-      std::string syncedLyrics = first["syncedLyrics"];
-      line = getSyncedLine(pos, syncedLyrics);
-    } else if (first.count("plainLyrics")) {
-      std::string plainLyrics = first["plainLyrics"];
-      line = getPlainLine(pos, dur, plainLyrics);
-    } else {
-      line = panicText;
-      std::cerr << "No lyrics for item" << std::endl;
+    try {
+      auto &first = ret[0];
+      if (first.count("syncedLyrics")) {
+        std::string syncedLyrics = first["syncedLyrics"];
+        line = getSyncedLine(pos, syncedLyrics);
+      } else if (first.count("plainLyrics")) {
+        std::string plainLyrics = first["plainLyrics"];
+        line = getPlainLine(pos, dur, plainLyrics);
+      } else {
+        std::cerr << "No lyrics for item" << std::endl;
+      }
+    } catch (const std::exception &e) {
+      std::cerr << "Error processing lyrics json: " << e.what() << std::endl;
     }
   } else {
     std::cerr << "No lyrics list" << std::endl;
