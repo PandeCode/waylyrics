@@ -18,8 +18,7 @@ jobs:
       run: |
           sudo apt update
           sudo apt upgrade
-          sudo apt install -f
-          sudo apt install -y just meson ninja-build pkg-config libgtk-3-dev libdbus-1-dev curl libglib2.0-dev libsdbus-c++-dev nlohmann-json3-dev libsystemd-dev  --fix-missing
+          sudo apt install -y libsystemd-dev  just meson ninja-build pkg-config libgtk-3-dev libdbus-1-dev curl libglib2.0-dev libsdbus-c++-dev nlohmann-json3-dev -m
           just
           just build-waylyrics
           TAG_NAME=$(date +"build-%Y%m%d-%H%M%S")
