@@ -1,0 +1,38 @@
+name: Go Build and Release
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    if: startsWith(github.event.head_commit.message, 'build')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: cachix/install-nix-action@v18
+      with:
+        nix_path: nixpkgs=channel:nixos-unstable
+    - uses: workflow/nix-shell-action@v3
+      with:
+        packages: just,meson,ninja,pkg-config,gtk3,dbus,curl,glib,sdbus-cpp,nlohmann_json,systemdLibs
+        script: |
+           just
+           just build-waylyrics
+           TAG_NAME=$(date +"build-%Y%m%d-%H%M%S")
+           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+           sha256sum ./waylyrics.so > waylyrics_sha256
+
+    - name: Upload Release Assets
+      uses: softprops/action-gh-release@v2
+      with:
+        prerelease: true
+        name: ${{ env.TAG_NAME }}
+        tag_name: ${{ env.TAG_NAME }}
+        files: |
+          waylyrics.so
+          waylyrics_sha256

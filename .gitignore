@@ -3,3 +3,4 @@ test
 .direnv
 .cache
 example/
+compile_commands.json
