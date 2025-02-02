@@ -16,13 +16,15 @@ jobs:
 
     - name: Build
       run: |
-           sudo apt install -y just meson ninja-build pkg-config libgtk-3-dev libdbus-1-dev curl libglib2.0-dev libsdbus-c++-dev nlohmann-json3-dev libsystemd-dev  --fix-missing
-
-           just
-           just build-waylyrics
-           TAG_NAME=$(date +"build-%Y%m%d-%H%M%S")
-           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-           sha256sum ./waylyrics.so > waylyrics_sha256
+          sudo apt update
+          sudo apt upgrade
+          sudo apt install -f
+          sudo apt install -y just meson ninja-build pkg-config libgtk-3-dev libdbus-1-dev curl libglib2.0-dev libsdbus-c++-dev nlohmann-json3-dev libsystemd-dev  --fix-missing
+          just
+          just build-waylyrics
+          TAG_NAME=$(date +"build-%Y%m%d-%H%M%S")
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          sha256sum ./waylyrics.so > waylyrics_sha256
 
     - name: Upload Release Assets
       uses: softprops/action-gh-release@v2
