@@ -38,6 +38,8 @@ To build and run this module, install the following:
 
 ## Building & Installing
 
+CI builds are pending. (check tags/releases)
+
 Run the following:
 
 ```sh
