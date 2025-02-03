@@ -4,12 +4,6 @@
 #include <gtk/gtk.h>
 #include <math.h>
 #include <stdio.h>
-#include <string.h>
-
-inline constexpr unsigned int WIDTH = 480;
-
-inline constexpr unsigned int HEIGHT = 270;
-
 
 using glm::lookAt;
 using glm::mat4;
@@ -17,70 +11,27 @@ using glm::perspective;
 using glm::rotate;
 using glm::vec3;
 
-inline const GLchar *VERTEX_SOURCE =
-    "#version 330\n"
-    "in vec3 position;\n"
-    "in vec3 normal;\n"
-    "out vec3 transformedNormal;\n"
-    "out vec3 originalNormal;\n"
-    "uniform mat4 projection;\n"
-    "uniform mat4 view;\n"
-    "uniform mat4 model;\n"
-    "void main(){\n"
-    "    gl_Position =  projection * view * model * vec4(position, 1.0);\n"
-    "    mat3 normalMatrix = transpose(inverse(mat3(view * model)));\n"
-    "    transformedNormal = normalMatrix * normal;\n"
-    "    originalNormal = abs(normal);\n"
-    "}\n";
 
-inline const GLchar *FRAGMENT_SOURCE =
-    "#version 330\n"
-    "in vec3 transformedNormal;\n"
-    "in vec3 originalNormal;\n"
-    "out vec4 outputColor;\n"
-    "void main() {\n"
-    "vec3 color = originalNormal;\n"
-    "float lighting = abs(dot(transformedNormal, vec3(0,0,-1)));\n"
-    "outputColor = vec4(color * lighting, 1.0f);\n" // constant white
-    "}";
+static constexpr unsigned int WIDTH = 480;
+static constexpr unsigned int HEIGHT = 270;
 
-/* The object we are drawing */
-static constexpr GLfloat vertex_data[] = {
-    1.0,  -1.0, -1.0, 0.0,  -1.0, 0.0,  1.0,  -1.0, 1.0,  0.0,
-    -1.0, 0.0,  -1.0, -1.0, 1.0,  0.0,  -1.0, 0.0,  1.0,  -1.0,
-    -1.0, 0.0,  -1.0, 0.0,  -1.0, -1.0, 1.0,  0.0,  -1.0, 0.0,
-    -1.0, -1.0, -1.0, 0.0,  -1.0, 0.0,
+inline GLchar *VERTEX_SOURCE =
+#include "../shaders/vert.glsl"
+;
 
-    -1.0, 1.0,  1.0,  0.0,  1.0,  0.0,  1.0,  1.0,  1.0,  0.0,
-    1.0,  0.0,  1.0,  1.0,  -1.0, 0.0,  1.0,  0.0,  -1.0, 1.0,
-    1.0,  0.0,  1.0,  0.0,  1.0,  1.0,  -1.0, 0.0,  1.0,  0.0,
-    -1.0, 1.0,  -1.0, 0.0,  1.0,  0.0,
+inline GLchar *FRAGMENT_SOURCE =
+#include "../shaders/frag.glsl"
+;
 
-    -1.0, -1.0, -1.0, -1.0, 0.0,  0.0,  -1.0, -1.0, 1.0,  -1.0,
-    0.0,  0.0,  -1.0, 1.0,  -1.0, -1.0, 0.0,  0.0,  -1.0, -1.0,
-    1.0,  -1.0, 0.0,  0.0,  -1.0, 1.0,  1.0,  -1.0, 0.0,  0.0,
-    -1.0, 1.0,  -1.0, -1.0, 0.0,  0.0,
-
-    -1.0, -1.0, 1.0,  0.0,  0.0,  1.0,  1.0,  -1.0, 1.0,  0.0,
-    0.0,  1.0,  -1.0, 1.0,  1.0,  0.0,  0.0,  1.0,  1.0,  -1.0,
-    1.0,  0.0,  0.0,  1.0,  1.0,  1.0,  1.0,  0.0,  0.0,  1.0,
-    -1.0, 1.0,  1.0,  0.0,  0.0,  1.0,
-
-    1.0,  1.0,  -1.0, 0.0,  0.0,  -1.0, 1.0,  -1.0, -1.0, 0.0,
-    0.0,  -1.0, -1.0, -1.0, -1.0, 0.0,  0.0,  -1.0, 1.0,  1.0,
-    -1.0, 0.0,  0.0,  -1.0, -1.0, -1.0, -1.0, 0.0,  0.0,  -1.0,
-    -1.0, 1.0,  -1.0, 0.0,  0.0,  -1.0,
-
-    1.0,  1.0,  1.0,  1.0,  0.0,  0.0,  1.0,  -1.0, 1.0,  1.0,
-    0.0,  0.0,  1.0,  -1.0, -1.0, 1.0,  0.0,  0.0,  1.0,  1.0,
-    1.0,  1.0,  0.0,  0.0,  1.0,  -1.0, -1.0, 1.0,  0.0,  0.0,
-    1.0,  1.0,  -1.0, 1.0,  0.0,  0.0
-
-};
+static constexpr GLfloat vertex_data[] =
+#include "../shaders/vertex_data"
+;
 
 static GtkWidget *gl_area = NULL;
 
 static long current_frame = 0.0;
+static float mouse_x = 0.0f;
+static float mouse_y = 0.0f;
 static long delta_time = 0.0;
 static GDateTime *last_frame;
 static int dt = 0;
@@ -91,6 +42,13 @@ static GLuint vao;
 
 static mat4 model = mat4(1.0);
 
+static gboolean on_mouse_move(GtkWidget *widget, GdkEventMotion *event,
+                              gpointer user_data) {
+  mouse_x = event->x;
+  mouse_y = event->y;
+  return TRUE;
+}
+
 /* Create and compile a shader */
 static GLuint create_shader(int type) {
   GLuint shader;
@@ -98,7 +56,11 @@ static GLuint create_shader(int type) {
   shader = glCreateShader(type);
   if (type == GL_FRAGMENT_SHADER) {
     glShaderSource(shader, 1, &FRAGMENT_SOURCE, NULL);
+    g_signal_connect(gl_area, "motion-notify-event", G_CALLBACK(on_mouse_move),
+                     NULL);
+    gtk_widget_add_events(gl_area, GDK_POINTER_MOTION_MASK);
   }
+
   if (type == GL_VERTEX_SHADER) {
     glShaderSource(shader, 1, &VERTEX_SOURCE, NULL);
   }
@@ -225,8 +187,10 @@ static void draw_box(long delta_time) {
   mat4 projection =
       perspective(45.0, double(WIDTH) / double(HEIGHT), 0.1, 100.0);
 
-  glUniform1f(glGetUniformLocation(program, "iTime"),
+  glUniform1f(glGetUniformLocation(program, "time"),
               (float)current_frame / 1000000.0);
+  glUniform2f(glGetUniformLocation(program, "resolution"), WIDTH, HEIGHT);
+  glUniform2f(glGetUniformLocation(program, "mouse"), mouse_x, mouse_y);
 
   glUniformMatrix4fv(glGetUniformLocation(program, "projection"), 1, GL_FALSE,
                      &projection[0][0]);
