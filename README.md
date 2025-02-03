@@ -4,6 +4,8 @@ Successor to [lyrify](https://github.com/pandecode/lyrify)
 
 Waylyrics is a Waybar module that retrieves the currently playing lyrics from Spotify using CFFI. It integrates with Waybar via the CFFI interface and displays synchronized or plain lyrics in real-time.
 
+![demo.gif](https://raw.githubusercontent.com/PandeCode/waylyrics/refs/heads/media/demo.gif)
+
 ## How It Works
 
 1. **D-Bus Communication**:
