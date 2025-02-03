@@ -177,7 +177,8 @@ inline std::string getPlainLine(uint64_t pos, uint64_t dur,
   return strVec[size_t(pos * strVec.size() / dur)];
 }
 
-inline std::optional<std::string> getCurrentLine() {
+inline std::optional<std::tuple<std::string, int64_t, int64_t>>
+getCurrentLine() {
   std::string line = panicText;
   auto [title, artists, pos, dur, ok] = getNowPlaying();
   auto ret = getLyrics(title + ' ' + artists);
@@ -199,5 +200,5 @@ inline std::optional<std::string> getCurrentLine() {
   } else {
     std::cerr << "No lyrics list" << std::endl;
   }
-  return line;
+  return std::make_tuple(line, pos, dur);
 }

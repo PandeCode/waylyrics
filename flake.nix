@@ -26,6 +26,11 @@
           sdbus-cpp
           nlohmann_json
           systemdLibs
+
+          glm
+          libepoxy
+          libGL
+          cmake
         ];
 
         shellHook = ''

@@ -1,3 +1,4 @@
+#include "gtk/gtk.h"
 #include "lib.hpp"
 #include "waybar_cffi_module.h"
 #include <thread>
@@ -24,7 +25,7 @@ void *wbcffi_init(const wbcffi_init_info *init_info,
 
   GtkContainer *root = init_info->get_root_widget(init_info->obj);
 
-  inst->container = GTK_BOX(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5));
+  inst->container = GTK_BOX(gtk_box_new(GTK_ORIENTATION_VERTICAL, 5));
   gtk_container_add(GTK_CONTAINER(root), GTK_WIDGET(inst->container));
 
   init();
@@ -32,12 +33,21 @@ void *wbcffi_init(const wbcffi_init_info *init_info,
   GtkLabel *label = GTK_LABEL(gtk_label_new(loadingText));
   gtk_container_add(GTK_CONTAINER(inst->container), GTK_WIDGET(label));
 
-  std::thread([label]() {
+  GtkProgressBar *progress = GTK_PROGRESS_BAR(gtk_progress_bar_new());
+  gtk_container_add(GTK_CONTAINER(inst->container), GTK_WIDGET(progress));
+
+  std::thread([label, progress]() {
     for (;;) {
 
-      auto line = getCurrentLine();
-      if (line.has_value()) {
-        gtk_label_set_text(label, line.value().c_str());
+      auto d = getCurrentLine();
+      if (d.has_value()) {
+        auto [line, pos, dur] = d.value();
+
+        gtk_label_set_text(label, line.c_str());
+
+        auto val = double(pos) / dur;
+        if (val > 0)
+          gtk_progress_bar_set_fraction(progress, val);
       }
 
       using namespace std::chrono_literals;

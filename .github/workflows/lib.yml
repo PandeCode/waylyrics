@@ -19,7 +19,7 @@ jobs:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
     - run: |
-          nix develop --command sh -c 'just && just build-waylyrics'
+          nix develop --command sh -c 'just && just build && just link'
           TAG_NAME=$(date +"build-%Y%m%d-%H%M%S")
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
           sha256sum ./waylyrics.so > waylyrics_sha256
