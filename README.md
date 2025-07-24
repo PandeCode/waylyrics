@@ -1,3 +1,11 @@
+# Archive 
+
+Better solution is just using a bash script
+This is my solution [lyrics-line.sh](https://github.com/PandeCode/dotnix/blob/main/bin/lyrics-line.sh)
+
+ Old readme below.
+---
+
 # Waylyrics - A Spotify Lyrics Module for Waybar
 
 Successor to [lyrify](https://github.com/pandecode/lyrify)
